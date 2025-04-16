@@ -17,7 +17,7 @@ interface TodoStore {
   clearTodos: () => void;
 }
 
-export const useTodoStore = create<TodoStore>()(
+const useTodoStore = create<TodoStore>()(
   persist(
     (set, get) => ({
       todos: [],
@@ -58,4 +58,6 @@ export const useTodoStore = create<TodoStore>()(
       },
     }
   )
-); 
+);
+
+export default useTodoStore; 

@@ -14,10 +14,12 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
   KeyboardEvent,
+  Modal,
+  Linking,
 } from 'react-native';
 import ViewShot from 'react-native-view-shot';
 import * as MediaLibrary from 'expo-media-library';
-import { useTodoStore } from '../store/todoStore';
+import useTodoStore from '../store/todoStore';
 import { Ionicons } from '@expo/vector-icons';
 
 const COLORS = {
@@ -42,6 +44,7 @@ export default function TodoList() {
   const viewShotRef = useRef<any>(null);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const ALBUM_NAME = 'TodoWallpaper';
+  const [showHelp, setShowHelp] = useState(false);
 
   useEffect(() => {
     const keyboardWillShow = (event: KeyboardEvent) => {
@@ -156,6 +159,79 @@ export default function TodoList() {
     });
   };
 
+  const openShortcutLink = async () => {
+    try {
+      const shortcutUrl = 'https://www.icloud.com/shortcuts/c13bb2c44201413991ab3e383e898c13';
+      const supported = await Linking.canOpenURL(shortcutUrl);
+      if (supported) {
+        await Linking.openURL(shortcutUrl);
+      } else {
+        Alert.alert('Error', 'Cannot open shortcut link');
+      }
+    } catch (error) {
+      console.error('Error opening shortcut link:', error);
+    }
+  };
+
+  const renderHelpModal = () => (
+    <Modal
+      animationType="slide"
+      transparent={true}
+      visible={showHelp}
+      onRequestClose={() => setShowHelp(false)}
+    >
+      <TouchableWithoutFeedback onPress={() => setShowHelp(false)}>
+        <View style={styles.modalOverlay}>
+          <TouchableWithoutFeedback>
+            <View style={styles.modalContent}>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>How to Set as Wallpaper</Text>
+                <TouchableOpacity 
+                  onPress={() => setShowHelp(false)}
+                  style={styles.closeButton}
+                >
+                  <Ionicons name="close" size={24} color={COLORS.text} />
+                </TouchableOpacity>
+              </View>
+
+              <ScrollView style={styles.modalScroll}>
+                <Text style={styles.instructionTitle}>⚙️ Create iOS Shortcut</Text>
+                
+                <TouchableOpacity 
+                  style={styles.downloadButton}
+                  onPress={openShortcutLink}
+                >
+                  <Ionicons name="cloud-download-outline" size={24} color={COLORS.background} />
+                  <Text style={styles.downloadButtonText}>Download Shortcut</Text>
+                </TouchableOpacity>
+
+                <Text style={styles.instructionSubtitle}>Or create manually:</Text>
+                
+                <View style={styles.stepContainer}>
+                  <Text style={styles.step}>1. Open Shortcuts app</Text>
+                  <Text style={styles.step}>2. Tap "+" to create new shortcut</Text>
+                  <Text style={styles.step}>3. Tap "Add Action"</Text>
+                  <Text style={styles.step}>4. Find and select "Find Photos"</Text>
+                  <Text style={styles.step}>5. Tap "Add Filter"</Text>
+                  <Text style={styles.step}>6. Set Album to "{ALBUM_NAME}"</Text>
+                  <Text style={styles.step}>7. Set Sort By to "Latest Added"</Text>
+                  <Text style={styles.step}>8. Enable Limit and set to 1</Text>
+                  <Text style={styles.step}>9. Add "Set Wallpaper" action</Text>
+                  <Text style={styles.step}>10. Choose Lock Screen or Home Screen</Text>
+                  <Text style={styles.step}>11. Name your shortcut</Text>
+                </View>
+
+                <Text style={styles.tip}>
+                  💡 Tip: Add the shortcut to your home screen for quick access
+                </Text>
+              </ScrollView>
+            </View>
+          </TouchableWithoutFeedback>
+        </View>
+      </TouchableWithoutFeedback>
+    </Modal>
+  );
+
   // Regular todo list view
   const renderMainView = () => (
     <KeyboardAvoidingView 
@@ -165,9 +241,20 @@ export default function TodoList() {
     >
       <View style={styles.header}>
         <Text style={styles.title}>Todo List</Text>
-        <TouchableOpacity style={styles.saveButton} onPress={captureAndSaveImage}>
-          <Ionicons name="image-outline" size={24} color={COLORS.primary} />
-        </TouchableOpacity>
+        <View style={styles.headerButtons}>
+          <TouchableOpacity 
+            style={styles.headerButton} 
+            onPress={() => setShowHelp(true)}
+          >
+            <Ionicons name="help-circle-outline" size={24} color={COLORS.primary} />
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={styles.headerButton} 
+            onPress={captureAndSaveImage}
+          >
+            <Ionicons name="image-outline" size={24} color={COLORS.primary} />
+          </TouchableOpacity>
+        </View>
       </View>
 
       <ScrollView 
@@ -283,6 +370,7 @@ export default function TodoList() {
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View style={styles.innerContainer}>
           {renderMainView()}
+          {renderHelpModal()}
           <View style={styles.hiddenView}>
             <ViewShot 
               ref={viewShotRef}
@@ -512,5 +600,85 @@ const styles = StyleSheet.create({
   },
   bottomPadding: {
     height: 80,
+  },
+  headerButtons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  headerButton: {
+    padding: 8,
+    marginLeft: 8,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  modalContent: {
+    backgroundColor: COLORS.surface,
+    borderRadius: 16,
+    width: '100%',
+    maxHeight: '80%',
+    padding: 20,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  modalTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: COLORS.text,
+  },
+  closeButton: {
+    padding: 4,
+  },
+  modalScroll: {
+    maxHeight: '90%',
+  },
+  instructionTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: COLORS.text,
+    marginBottom: 16,
+  },
+  instructionSubtitle: {
+    fontSize: 16,
+    color: COLORS.textSecondary,
+    marginVertical: 12,
+  },
+  stepContainer: {
+    marginVertical: 12,
+  },
+  step: {
+    fontSize: 16,
+    color: COLORS.text,
+    marginBottom: 8,
+    paddingLeft: 12,
+  },
+  tip: {
+    fontSize: 16,
+    color: COLORS.primary,
+    marginTop: 16,
+    marginBottom: 24,
+  },
+  downloadButton: {
+    backgroundColor: COLORS.primary,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 12,
+    borderRadius: 8,
+    marginVertical: 16,
+  },
+  downloadButtonText: {
+    color: COLORS.background,
+    fontSize: 16,
+    fontWeight: '600',
+    marginLeft: 8,
   },
 }); 

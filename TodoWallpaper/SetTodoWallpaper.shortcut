@@ -1,0 +1,18 @@
+This is a placeholder file for the shortcut. To create the actual shortcut:
+
+1. Open the Shortcuts app on your iPhone
+2. Create a new shortcut with these actions:
+
+Find Latest Photo where:
+- Album is "TodoWallpaper"
+- Sort by Latest
+- Limit is 1
+
+Set Wallpaper where:
+- Use Found Photo
+- Set as Lock Screen
+
+3. Export the shortcut
+4. Replace this file with the exported .shortcut file
+
+Note: The actual .shortcut file is a binary file that needs to be created on an iOS device using the Shortcuts app. 
