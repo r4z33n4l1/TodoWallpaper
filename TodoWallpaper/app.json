@@ -17,7 +17,9 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.r4z33n4l1.todowallpaper",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSPhotoLibraryUsageDescription": "TodoWallpaper needs access to your photo library to save your todo list as a wallpaper image. This allows you to set your tasks as your lock screen or home screen background.",
+        "NSPhotoLibraryAddUsageDescription": "TodoWallpaper saves your todo list as a wallpaper image to your photo library. This image can then be used as your lock screen or home screen background to keep your tasks visible."
       }
     },
     "android": {
