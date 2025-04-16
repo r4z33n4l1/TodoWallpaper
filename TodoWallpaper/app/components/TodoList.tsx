@@ -41,6 +41,7 @@ export default function TodoList() {
   const [newTodo, setNewTodo] = useState('');
   const viewShotRef = useRef<any>(null);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const ALBUM_NAME = 'TodoWallpaper';
 
   useEffect(() => {
     const keyboardWillShow = (event: KeyboardEvent) => {
@@ -73,6 +74,23 @@ export default function TodoList() {
     }
   };
 
+  const ensureAlbumExists = async () => {
+    try {
+      const albums = await MediaLibrary.getAlbumsAsync();
+      const todoAlbum = albums.find(album => album.title === ALBUM_NAME);
+      
+      if (!todoAlbum) {
+        console.log('Creating new album:', ALBUM_NAME);
+        return await MediaLibrary.createAlbumAsync(ALBUM_NAME, undefined, false);
+      }
+      
+      return todoAlbum;
+    } catch (error) {
+      console.error('Error ensuring album exists:', error);
+      throw error;
+    }
+  };
+
   const captureAndSaveImage = async () => {
     try {
       console.log('Starting image capture process...');
@@ -98,16 +116,25 @@ export default function TodoList() {
       });
 
       try {
-        // @ts-ignore
+        // Capture the image
         const uri = await viewShotRef.current.capture();
         console.log('Capture successful, URI:', uri);
 
-        await MediaLibrary.saveToLibraryAsync(uri);
-        console.log('Image saved to media library');
-        
-        Alert.alert('Success', 'Todo list wallpaper saved to your photos');
+        // Save to media library
+        const asset = await MediaLibrary.createAssetAsync(uri);
+        console.log('Asset created:', asset);
+
+        // Ensure album exists and add asset to it
+        const album = await ensureAlbumExists();
+        console.log('Album ready:', album);
+
+        if (asset) {
+          await MediaLibrary.addAssetsToAlbumAsync([asset], album, false);
+          console.log('Image saved to album:', ALBUM_NAME);
+          Alert.alert('Success', `Wallpaper saved to ${ALBUM_NAME} album`);
+        }
       } catch (captureError) {
-        console.error('Capture error:', captureError);
+        console.error('Capture or save error:', captureError);
         throw captureError;
       }
     } catch (error) {
